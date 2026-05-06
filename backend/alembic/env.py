@@ -5,10 +5,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.db.base import Base
+from app.adapters.gateways.db.base import Base
 
 # All models must be imported here so Base.metadata discovers them for autogenerate.
-import app.db.models  # noqa: F401 — registers Agent, Property, Description, etc.
+import app.adapters.gateways.db.models  # noqa: F401 — registers Agent, Property, Description, etc.
 
 config = context.config
 fileConfig(config.config_file_name)
