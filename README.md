@@ -1871,6 +1871,43 @@ Le backend doit être disponible à cette URL (voir `docker compose up`).
 
 ---
 
+## Environnement de production
+
+| Composant | Hébergeur | URL |
+|---|---|---|
+| Frontend | Vercel | https://real-estate-semantic-search.vercel.app |
+| Backend (FastAPI) | Render (Docker) | https://real-estate-semantic-search.onrender.com |
+| PostgreSQL | Aiven (managed, SSL) | `real-estate-semantic-search-db.*.aivencloud.com:23092` |
+| Vector DB | Qdrant Cloud (AWS eu-west-1) | `*.eu-west-1-0.aws.cloud.qdrant.io` |
+
+### Choix d'hébergement
+
+- **Vercel** — déploiement automatique depuis GitHub, optimisé pour les sites statiques Vite/React. Build command : `vite build`, Root directory : `frontend/`.
+- **Render** — service Docker, détecte `./backend/Dockerfile`. Le port est dynamique (`$PORT`). Plan Starter (free tier avec cold start).
+- **Aiven** — PostgreSQL managé avec SSL obligatoire. Connection string au format `postgresql+asyncpg://...?ssl=require` pour asyncpg.
+- **Qdrant Cloud** — cluster vectoriel managé. Connexion via URL HTTPS + API key (variables `QDRANT_URL` + `QDRANT_API_KEY`).
+
+### Variables d'environnement production (Render)
+
+```
+APP_ENV=production
+APP_DEBUG=false
+DATABASE_URL=postgresql+asyncpg://<user>:<pass>@<host>:<port>/defaultdb?ssl=require
+QDRANT_URL=https://<cluster>.qdrant.io
+QDRANT_API_KEY=<key>
+QDRANT_COLLECTION_NAME=properties
+GROQ_API_KEY=<key>
+GROQ_MODEL=llama-3.1-8b-instant
+USE_LLM=true
+SECRET_KEY=<generated>
+ALLOWED_ORIGINS=https://real-estate-semantic-search.vercel.app
+EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
+```
+
+> **Note Render** : les variables d'environnement doivent être saisies manuellement dans le dashboard (New → Web Service). Le fichier `render.yaml` n'est lu automatiquement que via New → Blueprint.
+
+---
+
 ## Stack technique
 
 | Service | Image / Runtime | Port(s) |
