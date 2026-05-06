@@ -1,0 +1,43 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker volumes (local bind mounts)
+data/postgres/
+data/qdrant/
+
+# Alembic (generated versions are committed, env.py is not sensitive)
+# Keep alembic/versions/ tracked
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

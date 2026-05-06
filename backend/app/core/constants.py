@@ -1,0 +1,1 @@
+SEMANTIC_SEARCH_QUERY_PREFIX = "bien immobilier"

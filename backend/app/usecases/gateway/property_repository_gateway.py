@@ -1,0 +1,19 @@
+from abc import ABC, abstractmethod
+from typing import List
+
+from app.entities.property import Property
+
+
+class PropertyRepositoryGateway(ABC):
+    @abstractmethod
+    async def search(self, filters: dict) -> List[Property]: ...
+    @abstractmethod
+    async def get_all(self) -> List[Property]: ...
+    @abstractmethod
+    async def get_by_ids(self, ids: list[int]) -> List[Property]: ...
+    @abstractmethod
+    async def count(self, filters: dict) -> int: ...
+    @abstractmethod
+    async def search_nearby(self, filters: dict) -> List[Property]: ...
+    @abstractmethod
+    async def count_nearby(self, filters: dict) -> int: ...
