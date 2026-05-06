@@ -29,14 +29,14 @@ from pathlib import Path
 # Équivalent : require __DIR__ . '/../../vendor/autoload.php'
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.db.session import AsyncSessionLocal  # factory AsyncSession réutilisée
-from app.db.models.agent import Agent
-from app.db.models.description import Description
-from app.db.models.mandate import Mandate
-from app.db.models.mandate_rental import MandateRental
-from app.db.models.mandate_sale import MandateSale
-from app.db.models.property import Property
-from app.db.models.property_listing import PropertyListing
+from app.adapters.gateways.db.session import AsyncSessionLocal  # factory AsyncSession réutilisée
+from app.adapters.gateways.db.models.agent import Agent
+from app.adapters.gateways.db.models.description import Description
+from app.adapters.gateways.db.models.mandate import Mandate
+from app.adapters.gateways.db.models.mandate_rental import MandateRental
+from app.adapters.gateways.db.models.mandate_sale import MandateSale
+from app.adapters.gateways.db.models.property import Property
+from app.adapters.gateways.db.models.property_listing import PropertyListing
 
 
 # ─── Helpers temporels ────────────────────────────────────────────────────────
