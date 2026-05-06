@@ -1,13 +1,11 @@
-import { useState } from 'react'
-
 interface Props {
+  value: string
+  onChange: (v: string) => void
   onSearch: (query: string) => void
   loading: boolean
 }
 
-export default function SearchBar({ onSearch, loading }: Props) {
-  const [value, setValue] = useState('')
-
+export default function SearchBar({ value, onChange, onSearch, loading }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (value.trim()) onSearch(value.trim())
@@ -18,7 +16,7 @@ export default function SearchBar({ onSearch, loading }: Props) {
       <input
         type="text"
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         placeholder='Ex : "Maison proche de Rambouillet", "appartement lumineux Paris"…'
         className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
