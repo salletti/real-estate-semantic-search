@@ -1,4 +1,4 @@
-# 🧠 Moteur de recherche immobilière par IA
+# Moteur de recherche immobilière par IA
 
 > Un moteur de requêtes en langage naturel pour données immobilières — construit
 > de façon incrémentale, couche par couche, de la recherche SQL à la recherche
