@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: real-estate-ai-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION_NAME
+        value: properties
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      - key: GROQ_TIMEOUT_SECONDS
+        value: "10.0"
+      - key: GROQ_MAX_TOKENS
+        value: "512"
+      - key: GROQ_TEMPERATURE
+        value: "0.0"
+      - key: GROQ_SEED
+        value: "42"
+      - key: USE_LLM
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: EMBEDDING_MODEL_NAME
+        value: sentence-transformers/all-MiniLM-L6-v2
+      - key: SEMANTIC_DEFAULT_TOP_K
+        value: "10"
+      - key: HYBRID_DEFAULT_TOP_K
+        value: "20"

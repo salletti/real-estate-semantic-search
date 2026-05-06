@@ -40,10 +40,10 @@ VECTOR_SIZE = 384
 
 def get_sync_client() -> QdrantClient:
     """Client synchrone — pour scripts et gestion de collection."""
-    return QdrantClient(
-        host=settings.vector_store.host,
-        port=settings.vector_store.port,
-    )
+    cfg = settings.vector_store
+    if cfg.url:
+        return QdrantClient(url=cfg.url, api_key=cfg.api_key)
+    return QdrantClient(host=cfg.host, port=cfg.port)
 
 
 def get_async_client() -> AsyncQdrantClient:
@@ -53,10 +53,10 @@ def get_async_client() -> AsyncQdrantClient:
         async with get_async_client() as client:
             results = await client.search(...)
     """
-    return AsyncQdrantClient(
-        host=settings.vector_store.host,
-        port=settings.vector_store.port,
-    )
+    cfg = settings.vector_store
+    if cfg.url:
+        return AsyncQdrantClient(url=cfg.url, api_key=cfg.api_key)
+    return AsyncQdrantClient(host=cfg.host, port=cfg.port)
 
 
 def ensure_collection(client: QdrantClient) -> None:

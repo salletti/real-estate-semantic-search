@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     qdrant_host: str = "qdrant"
     qdrant_port: int = 6333
     qdrant_collection_name: str = "properties"
+    # Cloud override: set these two to connect to Qdrant Cloud
+    qdrant_url: str | None = None
+    qdrant_api_key: str | None = None
 
     # Groq — flat env-backed fields kept for backward compatibility
     groq_api_key: str = ""
@@ -76,6 +79,8 @@ class Settings(BaseSettings):
     @cached_property
     def vector_store(self) -> VectorStoreSettings:
         return VectorStoreSettings(
+            url=self.qdrant_url,
+            api_key=self.qdrant_api_key,
             host=self.qdrant_host,
             port=self.qdrant_port,
             collection_name=self.qdrant_collection_name,

@@ -23,5 +23,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Source code is mounted as a volume in dev; COPY covers production builds
 COPY . .
 
-# Hot reload via uvicorn --reload watches /app (mounted volume in dev)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}

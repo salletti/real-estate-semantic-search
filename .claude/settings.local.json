@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose run *)",
+      "Bash(python -m pytest tests/api/test_property_search.py -v)",
+      "Bash(python3 -m pytest tests/api/test_property_search.py -v)",
+      "Bash(python -m pytest tests/query_engine/ -v)",
+      "Bash(python3 -m pytest tests/query_engine/ -v)",
+      "Bash(docker exec playiad_backend *)",
+      "Bash(xargs ls *)",
+      "Bash(docker compose *)",
+      "Bash(curl -sv \"http://localhost:8000/properties/search?q=Maison%20Paris%20500k\")",
+      "Bash(curl -s \"http://localhost:8000/properties/search?q=Maison%20Paris%20500k\")",
+      "Bash(curl -s \"http://localhost:8000/properties/search?q=Maison%20a%20Paris\")",
+      "Bash(python3 -c ' *)",
+      "Bash(docker exec *)",
+      "Bash(curl -s -X GET 'http://localhost:8000/properties/search?q=Maison%20%C3%A0%20Paris%20sous%20500k&page=1&per_page=10' -H 'accept: application/json')",
+      "Bash(python3 -m json.tool)",
+      "Bash(npm --version)",
+      "Bash(python3 -c \"import app.adapters.controllers.property_search; print\\(app.adapters.controllers.property_search.router\\)\")",
+      "Bash(cat)",
+      "Bash(python /tmp/audit.py)",
+      "Read(//tmp/**)",
+      "Bash(python3 *)"
+    ]
+  }
+}
