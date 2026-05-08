@@ -30,12 +30,6 @@ def embed_text(text: str) -> list[float]:
 
     Returns:
         list[float] de longueur 384 — valeurs normalisées entre -1 et 1.
-
-    Symfony équivalent :
-        public function embed(string $text): array
-        {
-            return $this->model->encode($text, normalizeEmbeddings: true);
-        }
     """
     model = _get_model()
     vector = model.encode(text, normalize_embeddings=True)

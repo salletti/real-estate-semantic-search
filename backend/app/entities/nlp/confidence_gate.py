@@ -6,16 +6,6 @@ RÔLE DU GATE
 --------------
 Décide si le LLM doit être appelé pour enrichir le résultat du rule parser.
 
-Analogie Symfony :
-    Le Gate est un `VoterInterface` : il répond oui/non à la question
-    "ce token mérite-t-il un traitement coûteux ?".
-
-    class LlmUsageVoter implements VoterInterface {
-        public function vote(TokenInterface $token, ...) {
-            return $this->isLowConfidence($token) ? ACCESS_GRANTED : ACCESS_DENIED;
-        }
-    }
-
 PHILOSOPHIE DU GATE
 --------------------
 Le LLM coûte du temps (latence réseau ~100-300ms) même sur Groq (free tier).
@@ -86,10 +76,6 @@ def has_possible_typo(query: str) -> bool:
         "villla"     → distance 1 de "villa"          → False (rule parser gère)
         "pavvillon"  → distance 2 de "pavillon"       → True  (LLM utile)
 
-    Analogie PHP :
-        similar_text() + seuil sur le score de correspondance.
-        On fait mieux ici : distance de Levenshtein exacte.
-
     Args:
         query: Requête originale (non normalisée, la casse est ignorée).
 
@@ -126,9 +112,6 @@ def should_use_llm(intent: PropertyIntent, query: str) -> tuple[bool, str]:
         Requête longue / sémantiquement riche → LLM apporte de la valeur.
         Typo probable → LLM corrige là où le fuzzy parser V2.4 a échoué.
 
-    Analogie Symfony :
-        comme un VoterInterface avec ACCESS_DENIED (phase 1) > ACCESS_GRANTED
-        (phase 2) > abstention (default False).
     """
     tokens = query.strip().split()
 

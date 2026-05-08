@@ -14,20 +14,6 @@ quel que soit ce que contient la base.
     ORM Model (Property)        → données internes, schéma DB
     Pydantic Schema (PropertyResult) → données publiques, contrat API
 
-Analogie Symfony :
-    Entity Doctrine             → usage interne service/repository
-    DTO de sortie / ApiResource → usage externe API Platform / Serializer
-
-    // PHP : DTO de sortie manuel
-    class PropertyResponse
-    {
-        public int $id;
-        public string $city;
-        public string $propertyType;  // renommé depuis "type" (mot réservé PHP)
-        public ?float $mandatePrice = null;
-        // on n'expose PAS uid, advisor_id, is_prestige, latitude…
-    }
-
 PYDANTIC V2 — from_attributes
 --------------------------------
 Par défaut, Pydantic v2 ne sait pas lire un objet Python classique (comme une
@@ -40,10 +26,6 @@ instance SQLAlchemy). Il attend un dict ou des kwargs.
 
     # Avec from_attributes :
     PropertyResult.model_validate(p)  # Pydantic lit p.id, p.city… automatiquement
-
-Équivalent Symfony :
-    $serializer->normalize($entity, 'json')
-    // Le Serializer lit les getters / propriétés publiques automatiquement.
 """
 
 from datetime import datetime
@@ -61,22 +43,12 @@ class PropertySearchResult(BaseModel):
     Renommé PropertyResult → PropertySearchResult pour lever toute ambiguïté :
     il existe un ORM Property, un schéma PropertyIntent, un moteur de recherche —
     "PropertySearchResult" indique sans ambiguïté : résultat de recherche, format API.
-
-    Symfony équivalent :
-        class PropertySearchResult
-        {
-            public int $id;
-            public string $city;
-            // …
-        }
     """
 
     # ConfigDict remplace class Config en Pydantic v2.
     #
     # from_attributes=True : permet PropertySearchResult.model_validate(orm_object)
     # → Pydantic lit les attributs de l'objet SQLAlchemy directement.
-    #
-    # Symfony équivalent : le Serializer lit les getters automatiquement.
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -101,9 +73,6 @@ class PropertySearchResult(BaseModel):
     #   → En LECTURE  : lire l'attribut .type de l'objet ORM     (via from_attributes)
     #   → En SORTIE   : sérialiser sous "property_type" (nom du champ, pas de l'alias)
     #
-    # Symfony équivalent :
-    #   #[SerializedName('property_type')]
-    #   public string $type;
     property_type: str = Field(validation_alias="type")
 
     transaction_type: str
@@ -139,20 +108,6 @@ class PropertySearchResponse(BaseModel):
     - per_page         : nombre de résultats par page demandé
     - total_pages      : nombre total de pages (calculé depuis total_count)
     - results          : liste des biens de la page courante
-
-    Symfony / API Platform équivalent :
-        class SearchResponse
-        {
-            public string $query;
-            public SearchIntentDTO $parsedIntent;
-            public QueryResolutionDTO $queryResolution;
-            public int $count;
-            public int $page;
-            public int $perPage;
-            public int $totalPages;
-            /** @var PropertySearchResult[] */
-            public array $results;
-        }
 
     Pourquoi exposer parsed_intent ET query_resolution ?
     - parsed_intent    : ce que le NLP a compris de la phrase (ville, prix, type…)

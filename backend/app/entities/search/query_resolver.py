@@ -5,23 +5,6 @@ Query Resolver V1
 Responsabilité unique : prendre un PropertyIntent et décider quelle
 stratégie de recherche appliquer.
 
-ANALOGIE SYMFONY / PHP
------------------------
-Ce module joue le rôle d'un Resolver dans Symfony — il n'exécute rien,
-il détermine COMMENT le traitement doit se faire, puis délègue.
-
-    // PHP — Resolver pattern
-    class QueryResolver
-    {
-        public function resolve(SearchIntent $intent): QueryStrategy
-        {
-            if ($intent->hasSemanticTerms() && $intent->hasFilters()) {
-                return new HybridStrategy();
-            }
-            // ...
-        }
-    }
-
 Ici, on retourne un DTO de résolution plutôt qu'un objet stratégie,
 car en V1 seul SQL est implémenté. Le query_executor (V2) recevra
 cette résolution et instanciera la bonne stratégie.

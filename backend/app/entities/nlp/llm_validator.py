@@ -7,18 +7,6 @@ RÔLE
 Nettoie la sortie brute du LLM en rejetant les champs "inventés" non fondés
 sur la requête originale.
 
-ANALOGIE SYMFONY
------------------
-Ce validator est l'équivalent d'une `ConstraintValidator` Symfony :
-
-    class NoInventedPriceValidator extends ConstraintValidator {
-        public function validate($value, Constraint $constraint) {
-            if ($value->maxPrice && !$this->hasDigitInQuery($constraint->query)) {
-                $this->context->addViolation('Prix inventé — absent de la requête');
-            }
-        }
-    }
-
 CHAMPS STRICTS vs CHAMPS SOUPLES
 ----------------------------------
 Ce validator ne touche QUE les champs STRICTS :

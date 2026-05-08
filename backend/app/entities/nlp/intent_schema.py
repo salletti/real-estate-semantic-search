@@ -27,19 +27,9 @@ NLP → Intent JSON → Repository — notre approche :
   - L'intent peut être loggé, stocké, rejoué
 
 
-PYDANTIC = SYMFONY DTO + VALIDATOR
-------------------------------------
-En PHP/Symfony :
-
-    class SearchRequest
-    {
-        #[Assert\\NotBlank]
-        public string $city;
-        public ?int $maxPrice = null;
-    }
-    $errors = $validator->validate($request);
-
-En Python avec Pydantic — même logique, une seule classe :
+PYDANTIC — DTO + VALIDATION AUTOMATIQUE
+-----------------------------------------
+Une seule classe fait office de DTO et de validateur :
 
     class PropertyIntent(BaseModel):
         city: str | None = None        # champ optionnel
@@ -49,17 +39,8 @@ En Python avec Pydantic — même logique, une seule classe :
     PropertyIntent(max_price="500000")  # → max_price=500000 (coercition str→int)
 
 
-ENUM PYDANTIC = PHP 8.1 BACKED ENUM
---------------------------------------
-PHP 8.1 :
-    enum IntentType: string
-    {
-        case PropertySearch = 'property_search';
-        case Unknown        = 'unknown';
-    }
-    $val = IntentType::PropertySearch->value; // → "property_search"
-
-Python (str, Enum) — comportement identique :
+ENUM PYDANTIC — str, Enum
+--------------------------
     class IntentType(str, Enum):
         property_search = "property_search"
         unknown         = "unknown"
@@ -93,10 +74,7 @@ from pydantic import BaseModel, Field
 
 
 class IntentType(str, Enum):
-    """Type d'intention détecté dans la requête utilisateur.
-
-    PHP équivalent : enum IntentType: string { case PropertySearch = 'property_search'; ... }
-    """
+    """Type d'intention détecté dans la requête utilisateur."""
 
     property_search = "property_search"  # l'utilisateur cherche un bien à acheter
     mandate_search = "mandate_search"    # l'utilisateur parle de mandats (vue agence)
@@ -140,9 +118,6 @@ class MandateType(str, Enum):
 
 class PropertyIntent(BaseModel):
     """DTO structuré représentant l'intention extraite d'une requête en langage naturel.
-
-    Analogie Symfony : un DTO de recherche hydraté depuis une phrase utilisateur
-    plutôt que depuis les paramètres d'une requête HTTP.
 
     Tous les champs sont optionnels — un intent partiel est toujours valide.
     Le parseur remplit ce qu'il peut extraire, laisse None pour le reste.

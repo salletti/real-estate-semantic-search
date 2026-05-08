@@ -2,12 +2,7 @@
 NLP — Intent Parser V1 (pédagogique, rule-based)
 ==================================================
 
-CE FICHIER = UN REQUESTPARAMCONVERTER SYMFONY... POUR UNE PHRASE
------------------------------------------------------------------
-En Symfony, un RequestParamConverter lit ?city=Paris&maxPrice=500000 et hydrate
-automatiquement un DTO.
-
-Ce parseur fait la même chose, mais depuis une phrase en langage naturel.
+Convertit une phrase en langage naturel en PropertyIntent (DTO structuré).
 
     Input  : "Maison à Paris sous 500k"
     Output : PropertyIntent(city="Paris", property_type=house, max_price=500000)
@@ -34,18 +29,6 @@ Ces limites seront adressées en V2 avec :
 - list[LocationConstraint] + LogicalOperator pour le multi-ville
 - Patterns géographiques ("zone de X", "près de X") pour le contexte
 - Un LLM pour gérer les fautes, synonymes et ambiguïtés
-
-
-ANALOGIE PHP — LE FLOW COMPLET
---------------------------------
-PHP Symfony (FormType + DTO) :
-    $form = $this->createForm(SearchType::class, $dto);
-    $form->handleRequest($request);  // hydrate $dto depuis HTTP params
-    if ($form->isValid()) { ... }
-
-Python (NLP + Pydantic) :
-    intent = parse_intent("Maison à Paris")  // hydrate depuis une phrase
-    # PropertyIntent est le DTO, parse_intent() est le "form handler"
 """
 
 import re
@@ -64,9 +47,6 @@ from app.entities.nlp.intent_schema import (
 # =============================================================================
 # DICTIONNAIRES DE MOTS-CLÉS
 # =============================================================================
-# Analogie PHP : équivalent d'un ChoiceType Symfony — liste des valeurs valides
-# avec mapping synonyme → valeur canonique.
-#
 # Structure : mot_clé_français → valeur_enum_canonique
 # Le parseur compare chaque token de la requête contre ces dictionnaires.
 
@@ -86,7 +66,6 @@ _PROPERTY_TYPE_KEYWORDS: dict[str, PropertyType] = {
     "garage": PropertyType.parking,
     "box": PropertyType.parking,
     # ── Synonymes enrichis (V2.4) ────────────────────────────────────────────
-    # Analogie PHP : un alias resolver dans un ChoiceType Symfony
     "pavillon": PropertyType.house,       # périphrase courante : pavillon = maison individuelle
     "maisonette": PropertyType.house,     # variante orthographique de "maisonnette"
     "residence": PropertyType.house,      # approximation : "résidence" peut désigner un immeuble ;
@@ -147,7 +126,6 @@ _RENTAL_KEYWORDS_SINGLE: frozenset[str] = frozenset(kw for kw in _RENTAL_KEYWORD
 # qualitative du bien :
 #
 #   1. Articles, pronoms, déterminants
-#      Analogie PHP : les "fill words" d'un analyseur Elasticsearch standard
 #
 #   2. Prépositions et conjonctions de liaison
 #      "sans", "mais", "comme", "entre"… relient des idées mais ne décrivent pas
@@ -186,8 +164,6 @@ _STOPWORDS: set[str] = {
 # Prix avec préposition de contexte : "sous 500k", "moins de 400 000", "< 300k"
 # Groupe 1 : valeur numérique (ex: "500", "400 000")
 # Groupe 2 : "k" si présent — multiplicateur × 1000
-#
-# Analogie PHP : preg_match('/(?:sous|moins de|<)\s*(\d[\d\s]*)\s*(k)?/', $query, $m)
 _PRICE_CONTEXT_RE = re.compile(
     r"(?:sous|moins de|<|max(?:i(?:mum)?)?|jusqu.a|inferieur a|budget|de moins de)\s*"
     r"(\d[\d\s]*)\s*(k)?\s*(?:€|euros?|eur)?(?:\b|$)",
@@ -285,13 +261,6 @@ AGENT_PATTERNS: re.Pattern[str] = re.compile(
 # filtrés AVANT la recherche de compound. Le tuple ne contient que les tokens
 # sémantiques qui subsistent après filtrage.
 #
-# Analogie PHP :
-#   const COMPOUND_PATTERNS = [
-#       ['vue', 'mer']       => 'vue mer',
-#       ['proche', 'gare']   => 'proche gare',
-#       ['centre', 'ville']  => 'centre ville',
-#   ];
-#
 # Ordre d'itération : longest-match-first (trié à la construction de la liste
 # triée interne) — pas d'ambiguïté pour les clés actuelles (toutes 2-tuples).
 _COMPOUND_SEMANTIC_PATTERNS: dict[tuple[str, ...], str] = {
@@ -326,8 +295,6 @@ def _normalize(text: str) -> str:
 
     Pourquoi : uniformiser l'input avant comparaison aux dictionnaires.
     Sans ça : "Appartement" ≠ "appartement", "exclusivité" ≠ "exclusivite".
-
-    Analogie PHP : mb_strtolower() + iconv('UTF-8', 'ASCII//TRANSLIT', $text)
     """
     text = text.lower()
     text = unicodedata.normalize("NFD", text)
@@ -339,10 +306,7 @@ def _tokenize(normalized: str) -> list[str]:
 
     Centralise re.findall(r'\\b\\w+\\b') — point de changement unique (DRY).
     Si le pattern évolue (support des tirets, chiffres composés...), une seule ligne à modifier.
-
-    Analogie PHP : preg_match_all('/\\b\\w+\\b/', $text, $m) → $m[0]
-    Différence clé vs explode() : \\b\\w+\\b gère proprement les frontières de mots
-    sans dépendre des espaces — ponctuation, apostrophes, etc. sont ignorées.
+    `\\b\\w+\\b` gère les frontières de mots sans dépendre des espaces — ponctuation et apostrophes ignorées.
 
     Exemple :
         _tokenize("maison à paris")  → ["maison", "a", "paris"]
@@ -398,11 +362,6 @@ def _extract_property_type(normalized: str) -> PropertyType | None:
     Limite V1 conservée : "maison ou appartement" → house (premier trouvé).
 
     SQL équivalent : WHERE type = 'house' | 'apartment' | ...
-
-    Analogie PHP :
-        Un ChoiceType Symfony avec un "forgiving normalizer" :
-        si la valeur n'est pas dans la liste exacte, on essaie de la corriger
-        avant de retourner null.
     """
     _candidates = set(_PROPERTY_TYPE_KEYWORDS.keys())
     for token in _tokenize(normalized):
@@ -468,22 +427,8 @@ def _extract_city(normalized: str) -> str | None:
     Stratégie : collecte TOUS les matches avec leur position, retourne le premier
     dans l'ordre du texte — pas dans l'ordre d'itération du set.
 
-    Pourquoi la position ? Un set Python est non-ordonné (comme un HashSet Java).
+    Pourquoi la position ? Un set Python est non-ordonné.
     Sans ce fix, "Paris ou Lyon" pouvait retourner Lyon si le set itérait Lyon en premier.
-
-    Python set vs list :
-        set  → non ordonné, O(1) lookup  — comme SplObjectStorage PHP / HashSet Java
-        list → ordonné,     O(n) lookup  — comme array PHP numéroté
-        Ici on veut le meilleur des deux : set pour les données, m.start() pour l'ordre.
-
-    PHP équivalent de ce fix :
-        $bestPos = PHP_INT_MAX; $bestCity = null;
-        foreach ($cityList as $city) {
-            $pos = mb_strpos($query, $city);
-            if ($pos !== false && $pos < $bestPos) {
-                $bestPos = $pos; $bestCity = $city;
-            }
-        }
 
     Limite V1 conservée :
       - Liste fermée — ville absente → city=None
@@ -525,8 +470,6 @@ def _extract_max_price(normalized: str) -> int | None:
         "500000€"      → bare pattern                → 500 000
 
     SQL équivalent : WHERE mandate_price < :max_price
-
-    Analogie PHP : preg_match + intval() + conditionnelle sur suffixe "k"
     """
     m = _PRICE_CONTEXT_RE.search(normalized)
     if m:
@@ -641,8 +584,6 @@ def _deduce_intent(
     2. mandate_search : mot "mandat" présent dans la requête
     3. property_search: au moins un champ métier reconnu (y compris nearby_city)
     4. unknown        : aucun signal reconnu
-
-    Analogie PHP : une série de if/elseif qui retourne un enum value.
     """
     if transaction_type == TransactionType.rental:
         return IntentType.rental_search
@@ -663,14 +604,6 @@ def _is_noise_token(token: str) -> bool:
 
     Filtre les tokens qui représentent des données structurées (prix, pièces,
     nombres purs) mais qui ne contribuent pas au sens qualitatif d'une requête.
-
-    Analogie PHP :
-        private function isNoise(string $token): bool {
-            return strlen($token) <= 2
-                || ctype_digit($token)
-                || preg_match('/^\\d+[kK]$/', $token)      // 500k, 300K
-                || preg_match('/^[tfTF]\\d+$/i', $token);  // t3, f4, T10
-        }
 
     Exemples exclus :
         "500k", "300K"  → prix abrégé     (_PRICE_FORMAT_RE)
@@ -704,18 +637,6 @@ def _extract_compound_semantic_terms(
 
     Algorithme : greedy left-to-right, longest-match-first.
     Un index consommé ne peut appartenir qu'à un seul compound.
-
-    Analogie PHP :
-        private function extractCompounds(array $tokens): array {
-            $compounds = []; $consumed = [];
-            foreach (self::PATTERNS as $pattern => $label) {
-                if (array_slice($tokens, $i, count($pattern)) === $pattern) {
-                    $compounds[] = $label;
-                    $consumed = array_merge($consumed, range($i, $i + count($pattern) - 1));
-                }
-            }
-            return [$compounds, $consumed];
-        }
 
     Args:
         tokens: Liste de tokens déjà filtrés (sans bruit ni stopwords).
@@ -765,11 +686,6 @@ def _extract_semantic_terms(normalized: str, recognized: set[str]) -> list[str]:
     L'ordre texte (étape 3) préserve la cohérence avec la requête originale :
         "studio moderne centre ville" → ["moderne", "centre ville"]
         et non ["centre ville", "moderne"].
-
-    Analogie PHP (pipeline Elasticsearch) :
-        1. TokenFilter (StopFilter, LengthFilter)
-        2. ShingleFilter (n-gram multi-mot)
-        3. Restitution dans l'ordre du document
     """
     # ── Étape 1 : filtrage ─────────────────────────────────────────────────────
     filtered = [
@@ -874,8 +790,7 @@ def parse_intent(query: str) -> PropertyIntent:
     recognized |= _SALE_KEYWORDS | _RENTAL_KEYWORDS | _EXCLUSIVE_KEYWORDS | _SIMPLE_MANDATE_KEYWORDS
     semantic_terms = _extract_semantic_terms(query_normalized, recognized)
 
-    # Étape 5 — Assemblage du PropertyIntent
-    # Pydantic valide les types ici — équivalent du $validator->validate() Symfony
+    # Étape 5 — Assemblage et validation du PropertyIntent par Pydantic
     return PropertyIntent(
         intent=intent,
         city=city,
@@ -918,21 +833,6 @@ def parse_intent_using_llm(query: str) -> PropertyIntent:
     Backward compatibility :
         parse_intent() V2.4 est INCHANGÉ — cette fonction est additive.
         Activée via USE_LLM=true dans .env (settings.use_llm).
-
-    Analogie Symfony :
-        Un décorateur sur le RequestParamConverter qui tente une correction
-        LLM si la conversion initiale est incomplète :
-
-            class LlmEnhancedParamConverter implements ParamConverterInterface {
-                public function apply(Request $request, ...) {
-                    $intent = $this->ruleConverter->apply($request, ...);
-                    if ($this->gate->shouldUseLlm($intent, $request->query)) {
-                        $llmResult = $this->llmService->enrich($request->query);
-                        return $this->merger->merge($intent, $llmResult);
-                    }
-                    return $intent;
-                }
-            }
 
     Args:
         query: Requête utilisateur (ex: "aprtement familial vers lyon").

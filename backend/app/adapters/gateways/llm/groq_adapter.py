@@ -8,14 +8,6 @@ Appelle l'API Groq pour extraire un `LlmIntentResponse` depuis une requête.
 Si l'appel échoue (timeout, API down, clé absente), retourne `None` →
 le pipeline revient automatiquement au résultat du rule parser.
 
-ANALOGIE SYMFONY
------------------
-Ce service est l'équivalent d'un `HttpClientInterface` Symfony injecté dans
-un service métier :
-    - Le client est lazy-loaded (initialisé au premier appel)
-    - Les erreurs sont catchées et transformées en null → graceful degradation
-    - Pas de couplage fort : le caller ne sait pas si le LLM a été appelé
-
 GROQ POURQUOI ?
 ----------------
 - API OpenAI-compatible → même SDK Python (openai>=1.35.0), zero friction

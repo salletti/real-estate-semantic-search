@@ -10,15 +10,6 @@ Priorité :
     Rule parser > LLM sur les champs stricts
     LLM > Rule parser uniquement pour remplir les trous (champs None)
 
-ANALOGIE SYMFONY
------------------
-Pattern "Fill-null" : comme un `PropertyAccessor` Symfony qui applique un patch
-partiel sur un objet existant — on ne touche QU'AUX champs null.
-
-    $merger = new IntentMerger();
-    $merged = $merger->merge($ruleIntent, $llmIntent);
-    // → $ruleIntent est la base de confiance, $llmIntent est le patch
-
 SÉCURITÉ DU MERGE
 ------------------
 Si le rule parser a détecté city="Paris" et le LLM dit city="Lyon" :

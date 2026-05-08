@@ -24,18 +24,6 @@ POURQUOI PAS ENCORE UN LLM ?
 Avec Levenshtein V1 : résultat toujours identique, testable unitairement,
 debuggable en moins de 5 minutes, gratuit à l'exécution.
 
-ANALOGIE PHP
--------------
-// Normalizer Symfony : transforme une valeur en canonical form
-// Notre fuzzy = un "forgiving normalizer" qui tolère les fautes de frappe
-
-    class TypoTolerantNormalizer implements NormalizerInterface {
-        public function normalize($object, ...) {
-            $closest = $this->levenshteinSearch($object->value, $this->validValues);
-            return $closest ?? null;
-        }
-    }
-
 IMPLÉMENTATION PURE PYTHON — PAS DE DÉPENDANCE EXTERNE
 --------------------------------------------------------
 La bibliothèque python-Levenshtein (C extension) serait plus rapide pour de
@@ -54,9 +42,6 @@ def _levenshtein(a: str, b: str) -> int:
         - Suppression: "villaa" → "villa"  (1 suppression)
         - Substitution: "villo" → "villa" (1 substitution)
 
-    Analogie PHP :
-        similar_text() mesure la similarité mais pas la distance de Levenshtein.
-        levenshtein() existe en PHP natif — même algorithme, même complexité.
     """
     if len(a) < len(b):
         a, b = b, a
@@ -101,11 +86,6 @@ def find_closest_keyword(
         "vilaa"      → "villa"       (1 'a' en trop)
         Distance 2 génère des faux positifs sur les mots courts français :
             "pas" → "parking" ? "loft" ?  → trop risqué.
-
-    Analogie PHP :
-        // levenshtein() natif PHP — même sémantique
-        $matches = array_filter($candidates, fn($c) => levenshtein($token, $c) <= 1);
-        return count($matches) === 1 ? $matches[0] : null;
 
     Args:
         token: Token normalisé (minuscules, accents supprimés) à matcher.

@@ -8,11 +8,7 @@ POURQUOI UN DTO SÉPARÉ ?
 Query Engine. Il doit TOUJOURS être fiable.
 
 `LlmIntentResponse` est une sortie brute du LLM — non fiable par nature.
-Traiter directement la réponse LLM comme un `PropertyIntent` serait l'équivalent
-Symfony de faire :
-
-    $intent = $this->serializer->deserialize($llmResponse, PropertyIntent::class);
-    // puis utiliser $intent sans validation — anti-pattern dangereux
+Ne jamais l'utiliser directement sans validation.
 
 Flow correct :
     LlmIntentResponse (non validé)

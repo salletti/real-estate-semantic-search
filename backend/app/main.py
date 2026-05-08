@@ -25,10 +25,6 @@ app.add_middleware(
 #
 # include_router() monte le router dans l'application.
 # Toutes les routes définies dans property_search_router deviennent actives.
-#
-# Symfony équivalent (config/routes.yaml) :
-#   properties:
-#       resource: '../src/Controller/PropertyController.php'
 app.include_router(property_search_router)
 
 
