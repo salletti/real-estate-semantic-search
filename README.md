@@ -1,3 +1,13 @@
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Qdrant](https://img.shields.io/badge/Qdrant-vector--db-DC244C?logo=qdrant&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-LLaMA%203.1-F55036)
+![Tests](https://img.shields.io/badge/Tests-380%2B-success?logo=pytest&logoColor=white)
+![Deployed](https://img.shields.io/badge/Deployed-Live-brightgreen?logo=vercel&logoColor=white)
+
 # Moteur de recherche immobilière par IA
 
 > Un moteur de requêtes en langage naturel pour données immobilières — construit
